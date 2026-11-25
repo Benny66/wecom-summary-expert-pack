@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "account_label": "demo-sales",
+  "updated_at": "2026-11-25T21:00:00+08:00",
+  "last_capture_at": "2026-11-23",
+  "silence_days": 7,
+  "clients": {
+    "a1b2c3d4e5f60718293a4b5c6d7e8f90": {"name": "张三(某科技)", "company": "某科技", "type": "single"},
+    "b1b2c3d4e5f60718293a4b5c6d7e8f91": {"name": "李四", "company": "", "type": "single"},
+    "c1b2c3d4e5f60718293a4b5c6d7e8f92": {"name": "王五", "company": "", "type": "single"},
+    "d1b2c3d4e5f60718293a4b5c6d7e8f93": {"name": "灵动科技项目对接群(外部)", "company": "灵动科技", "type": "group"}
+  },
+  "items": [
+    {
+      "item_id": "a1b2c3-20261119-01",
+      "client": "张三(某科技)",
+      "conversation_key": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+      "title": "年费报价与折扣谈判",
+      "stage": "quote",
+      "status": "active",
+      "opened_at": "2026-11-19",
+      "last_update_at": "2026-11-23",
+      "next_action": "出三档阶梯价并把实施折进去",
+      "next_action_due": "2026-11-24",
+      "amount": {
+        "value": 300000,
+        "currency": "CNY",
+        "source": "客户口述预算上限",
+        "evidence_msg_id": "a0000000000000000000000000000005"
+      },
+      "evidence": [
+        {
+          "at": "2026-11-19 09:30",
+          "msg_id": "a0000000000000000000000000000002",
+          "quote": "我们这边下周就要上线，时间比较紧"
+        },
+        {
+          "at": "2026-11-20 14:00",
+          "msg_id": "a0000000000000000000000000000004",
+          "quote": "报价单发您了，年费 28 万，含 3 个环境。实施另算 4 万"
+        },
+        {
+          "at": "2026-11-20 16:20",
+          "msg_id": "a0000000000000000000000000000005",
+          "quote": "28 万有点超预算了，我们预算 30 万以内，但要求实施包含在内"
+        },
+        {
+          "at": "2026-11-23 15:10",
+          "msg_id": "a0000000000000000000000000000008",
+          "quote": "阶梯价出来了吗？我们周五要报内部审批"
+        }
+      ],
+      "status_history": [
+        {"at": "2026-11-19", "from": null, "to": "quote", "note": "客户主动询价，下周要上线"},
+        {"at": "2026-11-20", "from": "quote", "to": "quote", "note": "报价 28 万+实施 4 万；客户嫌高，要求实施包含"}
+      ]
+    },
+    {
+      "item_id": "b1b2c3-20261119-01",
+      "client": "李四",
+      "conversation_key": "b1b2c3d4e5f60718293a4b5c6d7e8f91",
+      "title": "试用环境与演示",
+      "stage": "solution",
+      "status": "active",
+      "opened_at": "2026-11-19",
+      "last_update_at": "2026-11-20",
+      "next_action": "确认试用反馈并约演示时间",
+      "next_action_due": "2026-11-26",
+      "evidence": [
+        {
+          "at": "2026-11-19 10:00",
+          "msg_id": "b0000000000000000000000000000001",
+          "quote": "试用环境给您开好了，账号发到您邮箱"
+        },
+        {
+          "at": "2026-11-20 11:00",
+          "msg_id": "b0000000000000000000000000000003",
+          "quote": "试用还顺利吗？需要我这边配合做个演示的话随时说"
+        }
+      ],
+      "status_history": [
+        {"at": "2026-11-19", "from": null, "to": "solution", "note": "试用环境开通"}
+      ]
+    },
+    {
+      "item_id": "c1b2c3-20261122-01",
+      "client": "王五",
+      "conversation_key": "c1b2c3d4e5f60718293a4b5c6d7e8f92",
+      "title": "开票与集团框架协议",
+      "stage": "negotiation",
+      "status": "active",
+      "opened_at": "2026-11-22",
+      "last_update_at": "2026-11-22",
+      "next_action": "回复专票税率，确认集团框架协议是否可行",
+      "next_action_due": "2026-11-23",
+      "evidence": [
+        {
+          "at": "2026-11-22 09:00",
+          "msg_id": "c0000000000000000000000000000002",
+          "quote": "你们能开专票吗？税率多少"
+        },
+        {
+          "at": "2026-11-22 09:05",
+          "msg_id": "c0000000000000000000000000000003",
+          "quote": "合同能不能走我们集团的框架协议"
+        }
+      ],
+      "status_history": [
+        {"at": "2026-11-22", "from": null, "to": "negotiation", "note": "客户问专票与框架协议，属于商务条款"}
+      ]
+    },
+    {
+      "item_id": "d1b2c3-20261121-01",
+      "client": "灵动科技",
+      "conversation_key": "d1b2c3d4e5f60718293a4b5c6d7e8f93",
+      "channel": "group:灵动科技项目对接群(外部)",
+      "title": "实施方案与 SSO 对接确认",
+      "stage": "solution",
+      "status": "active",
+      "opened_at": "2026-11-21",
+      "last_update_at": "2026-11-21",
+      "next_action": "盯梁伟下周一前出实施排期，并就 SSO 对接方案回群",
+      "next_action_due": "2026-11-24",
+      "evidence": [
+        {
+          "at": "2026-11-21 09:10",
+          "msg_id": "d0000000000000000000000000000001",
+          "quote": "报价单和实施方案发群里了"
+        },
+        {
+          "at": "2026-11-21 09:52",
+          "msg_id": "d0000000000000000000000000000003",
+          "quote": "实施我这边接，下周一能出排期"
+        },
+        {
+          "at": "2026-11-21 15:05",
+          "msg_id": "d0000000000000000000000000000005",
+          "quote": "账号能对接我们的 SSO 吗"
+        }
+      ],
+      "status_history": [
+        {"at": "2026-11-21", "from": null, "to": "solution",
+         "note": "群里发了报价与实施方案，客户确认实施由我方承接后追问 SSO，同事（梁伟）承接实施"}
+      ]
+    }
+  ]
+}

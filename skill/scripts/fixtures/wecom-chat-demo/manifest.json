@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "start": "2026-11-01",
+  "account_label": "demo-sales",
+  "conversations": {
+    "a1b2c3d4e5f60718293a4b5c6d7e8f90": {
+      "key": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+      "names": ["张三(某科技)"],
+      "history_complete": true,
+      "latest_message_at": "2026-11-23 15:10:00",
+      "earliest_message": "2026-11-18 10:02:00",
+      "reached_start": true,
+      "last_status": "ok"
+    },
+    "b1b2c3d4e5f60718293a4b5c6d7e8f91": {
+      "key": "b1b2c3d4e5f60718293a4b5c6d7e8f91",
+      "names": ["李四"],
+      "history_complete": true,
+      "latest_message_at": "2026-11-20 11:00:00",
+      "earliest_message": "2026-11-19 10:00:00",
+      "reached_start": true,
+      "last_status": "ok"
+    },
+    "c1b2c3d4e5f60718293a4b5c6d7e8f92": {
+      "key": "c1b2c3d4e5f60718293a4b5c6d7e8f92",
+      "names": ["王五"],
+      "history_complete": false,
+      "latest_message_at": "2026-11-22 09:05:00",
+      "earliest_message": "2026-11-15 14:00:00",
+      "reached_start": false,
+      "last_status": "partial"
+    },
+    "d1b2c3d4e5f60718293a4b5c6d7e8f93": {
+      "key": "d1b2c3d4e5f60718293a4b5c6d7e8f93",
+      "names": ["灵动科技项目对接群(外部)"],
+      "history_complete": true,
+      "latest_message_at": "2026-11-21 15:05:00",
+      "earliest_message": "2026-11-21 09:10:00",
+      "reached_start": true,
+      "last_status": "ok"
+    },
+    "e1b2c3d4e5f60718293a4b5c6d7e8f94": {
+      "key": "e1b2c3d4e5f60718293a4b5c6d7e8f94",
+      "names": ["宏远集团上线群"],
+      "history_complete": true,
+      "latest_message_at": "2026-11-22 11:00:00",
+      "earliest_message": "2026-11-22 10:00:00",
+      "reached_start": true,
+      "last_status": "ok"
+    }
+  },
+  "runs": []
+}

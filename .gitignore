@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 构建产物（build.sh 每次重建）
+expert/build/
+
+# 本地工具与记忆（含工作日志、openspec 命令，不进仓库）
+.codebuddy/
+.workbuddy/
+
+# 本地运行产物
+worklog/

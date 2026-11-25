@@ -1,0 +1,74 @@
+{
+  "name": "sales-worklog-expert",
+  "version": "0.2.0",
+  "description": "Turns a salesperson's WeCom client chats and client group chats into daily, weekly, monthly, quarterly, half-year and annual work reports, backed by an item ledger where every claim and amount points to a message.",
+  "author": {
+    "name": "bennywen",
+    "email": "2283743369@qq.com"
+  },
+  "agents": [
+    "./agents/sales-worklog-expert.md"
+  ],
+  "skills": [
+    "./skills/sales-worklog"
+  ],
+  "expertType": "agent",
+  "agentName": "sales-worklog-expert",
+  "displayName": {
+    "zh": "销售客户跟进总结",
+    "en": "Sales Client Follow-up Reports"
+  },
+  "profession": {
+    "zh": "销售运营与客户跟进",
+    "en": "Sales Operations Specialist"
+  },
+  "displayDescription": {
+    "zh": "把与客户的企微单聊和客户群整理成日报、周报、月报、季报、半年报与年报，结论挂证据，金额只取原文。",
+    "en": "Turns WeCom client chats and client group chats into daily, weekly, monthly, quarterly, half-year and annual reports; every claim cites a message and every amount comes from the original text."
+  },
+  "avatar": "avatars/expert.png",
+  "categoryId": "07-SalesCommerce",
+  "defaultInitPrompt": {
+    "zh": "把我这周跟客户的聊天整理成周报",
+    "en": "Turn this week's client chats into a weekly report"
+  },
+  "plugin": "sales-worklog-expert",
+  "tags": [
+    {
+      "zh": "客户跟进",
+      "en": "Client Follow-up"
+    },
+    {
+      "zh": "工作总结",
+      "en": "Work Summary"
+    },
+    {
+      "zh": "聊天记录",
+      "en": "Chat Records"
+    }
+  ],
+  "quickPrompts": [
+    {
+      "zh": "把我这周跟客户的聊天整理成周报",
+      "en": "Turn this week's client chats into a weekly report"
+    },
+    {
+      "zh": "写今天的日报",
+      "en": "Write today's daily report"
+    },
+    {
+      "zh": "哪些客户我欠着回复",
+      "en": "Which clients are still waiting for my reply"
+    }
+  ],
+  "keywords": [
+    "sales",
+    "worklog",
+    "weekly report",
+    "client follow-up",
+    "WeCom",
+    "group chat",
+    "ledger",
+    "evidence"
+  ]
+}
