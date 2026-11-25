@@ -208,7 +208,7 @@ wecom-summary-expert-pack/
 ├── expert/                                 # WorkBuddy 专家包外壳
 │   ├── .codebuddy-plugin/plugin.json
 │   ├── agents/sales-worklog-expert.md      # 人设、意图路由、确认点、降级、红线
-│   ├── avatars/expert.png                  # 512×512，由脚本生成
+│   ├── avatars/expert.png                  # 512×512 插画头像
 │   └── scripts/                            # make_avatar / build / check_package
 └── openspec/changes/add-sales-worklog/     # proposal / design / tasks
 ```

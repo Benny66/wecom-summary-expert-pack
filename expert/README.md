@@ -18,7 +18,7 @@ WorkBuddy 专家包（Agent 型）：把销售本人在企业微信里与客户�
 sales-worklog-expert/
 ├── .codebuddy-plugin/plugin.json   name/version/agents[]/skills[]/expertType/agentName/展示字段
 ├── agents/sales-worklog-expert.md  frontmatter + 人设 + 6 意图路由 + 6 确认点 + 降级分档 + 11 红线
-├── avatars/expert.png              512×512 PNG，由 scripts/make_avatar.py 生成
+├── avatars/expert.png              512×512 PNG 插画头像（缺失时由 make_avatar.py 生成兜底版）
 ├── scripts/make_avatar.py          纯标准库画头像（无第三方依赖、无外部计费）
 ├── scripts/build.sh                组装 + zip + 自检
 ├── scripts/check_package.py        逐项断言，零依赖
@@ -57,8 +57,8 @@ SKILL_SRC=/path/to/skill bash scripts/build.sh         # 技能源不在默认�
 
 ## 上架前要改的
 
-- `plugin.json` 的 `author.email` 目前填的是 `bennywen@tencent.com`，换成你的实际邮箱。
-- 头像由脚本生成（深色卡片 + 三条进度线 + 橙色对勾）。要换成插画版，替换 `avatars/expert.png` 后重跑 `build.sh`，注意必须仍是 512×512、≤500KB。
+- `plugin.json` 的 `author.email` 目前填的是 `2283743369@qq.com`，需要换就改这里。
+- 头像是插画版（深蓝圆角卡 + 戴耳麦的销售手持清单），已裁成 512×512 / 约 300KB。`scripts/make_avatar.py` 保留为兜底：`avatars/expert.png` 缺失时 `build.sh` 会自动生成一个纯色卡片版。换图直接替换 `avatars/expert.png` 后重跑 `build.sh`，必须仍是 512×512、≤500KB。
 
 ## 已知能力边界（不是缺陷）
 
