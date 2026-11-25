@@ -35,7 +35,7 @@ python3 scripts/make_avatar.py                         # 只生成头像
 SKILL_SRC=/path/to/skill bash scripts/build.sh         # 技能源不在默认位置
 ```
 
-产物 `sales-worklog-expert-<version>.zip`，包内顶层目录 `sales-worklog-expert/`。
+产物 `sales-worklog-expert-<version>.zip`，包内顶层目录 `sales-worklog-expert/`。zip 不进仓库（`.gitignore` 已排除），通过 GitHub Releases 分发。
 
 打包会排除开发期产物：`fixtures/`、`selftest.sh`、`test-prompts.json`、`vendor_wecom.sh`、`__pycache__`。采集模块本身随包发布（`skills/sales-worklog/scripts/wecom/`），装好即可采。
 

@@ -6,8 +6,9 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 
-# 构建产物（build.sh 每次重建）
+# 构建产物（build.sh 每次重建；zip 走 Releases 分发，不进仓库）
 expert/build/
+expert/*.zip
 
 # 本地工具与记忆（含工作日志、openspec 命令，不进仓库）
 .codebuddy/

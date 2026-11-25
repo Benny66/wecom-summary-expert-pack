@@ -12,7 +12,7 @@
 |---|---|
 | 技能 `skill/` | v0.2，端到端跑通：fixture 33 项断言 + 真实仓库守卫 2 项，全绿 |
 | 采集模块 | 随技能携带（`scripts/wecom/` 13 py + 6 swift），装好即用 |
-| 专家包 `expert/` | v0.2，`check_package.py` 57 项 0 失败，产出 `expert/sales-worklog-expert-0.2.0.zip` |
+| 专家包 `expert/` | v0.2，`check_package.py` 57 项 0 失败；成品包见 [Releases](https://github.com/Benny66/wecom-summary-expert-pack/releases) |
 
 ---
 
@@ -209,10 +209,11 @@ wecom-summary-expert-pack/
 │   ├── .codebuddy-plugin/plugin.json
 │   ├── agents/sales-worklog-expert.md      # 人设、意图路由、确认点、降级、红线
 │   ├── avatars/expert.png                  # 512×512，由脚本生成
-│   ├── scripts/                            # make_avatar / build / check_package
-│   └── sales-worklog-expert-0.2.0.zip      # 可上传的成品包
+│   └── scripts/                            # make_avatar / build / check_package
 └── openspec/changes/add-sales-worklog/     # proposal / design / tasks
 ```
+
+专家包产物（`sales-worklog-expert-<version>.zip`）不进仓库，通过 [Releases](https://github.com/Benny66/wecom-summary-expert-pack/releases) 分发；本地要重新生成就 `cd expert && bash scripts/build.sh`。
 
 ## 自检与打包
 
