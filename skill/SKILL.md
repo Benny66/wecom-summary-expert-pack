@@ -1,6 +1,6 @@
 ---
 name: sales-worklog
-description: "把企业微信里与客户的单聊（必要时加客户群）整理成一份可直接发给直属上级的工作汇报：按客户维护事项台账，从台账生成日报、周报、月报、季报、半年报、年报到本地 Markdown。每条结论都挂消息证据，金额与客户原话只取原文。当用户说「写今天的日报」「这周跟客户聊了什么」「生成本周周报」「整理我的客户跟进」「月度总结」「季度复盘」，或说 daily / weekly / monthly report、work log、client follow-up summary，或要求把聊天记录变成工作汇报时使用。"
+description: "把企业微信里与客户的单聊（必要时加客户群）整理成一份可直接发给直属上级的工作汇报：按客户维护事项台账，从台账生成日报、周报、月报、季报、半年报、年报到本地 Markdown。每条结论都挂消息证据，金额、日期、数量与客户原话只取原文。当用户说「写今天的日报」「这周跟客户聊了什么」「生成本周周报」「整理我的客户跟进」「月度总结」「季度复盘」，或说 daily / weekly / monthly report、work log、client follow-up summary，或要求把聊天记录变成工作汇报时使用。"
 version: 0.3.0
 compatibility: "采集需要 macOS、已登录的企业微信、Swift 编译器（swiftc）与执行应用的辅助功能权限；采集模块随技能携带（scripts/wecom/ 与 capture_chat.py），无需额外安装。切窗口与台账校验需要 Python 3.8+，纯标准库。产物是本地 Markdown，不依赖任何 MCP。"
 agent_created: true
@@ -156,10 +156,10 @@ python3 scripts/prepare_window.py --store <仓库> --month 2026-11 --out <目录
 先看三件事再往下走：
 
 - **方向**：标题行里的「我 N / 对方 M」。出现 `我 0` 说明方向判定失效（`is_outgoing` 缺失且 `--self-names` 没对上），必须先把名字补对——否则整个窗口看起来是客户独白，报告必然失真。
-- **覆盖**：`coverage.incomplete` 非空说明该客户本窗口不是完整历史。
+- **覆盖**：`coverage.incomplete` 是一个**客户名列表**，列进来的客户本窗口都不是完整历史；逐个看它们各自的 `history_complete`，值为 `false`。`coverage.all_complete=true` 表示整个窗口都完整。
 - **分边**：有群时看 `coverage.groups_side_unknown`。非 0 就把那几个群单独列进「未验证项」。
 
-🔴 CHECKPOINT：先看 `coverage`。`history_complete=false` 的会话，报告里必须写「该客户本窗口不是完整历史」，不能据此说「本月无进展」。
+🔴 CHECKPOINT：先看 `coverage`。只要 `coverage.incomplete` 非空（等价于这些会话 `history_complete=false`），报告里必须逐个写「该客户本窗口不是完整历史」，不能据此说「本月无进展」。
 
 ### 第 3 步：抽事项
 
@@ -209,16 +209,16 @@ python3 scripts/check_ledger.py --ledger ~/worklog/ledger.json \
 
 **退出码非 0 不许渲染报告。** ERROR 级：结构不合法、`item_id` 重复或格式错、`status`/`stage` 不在枚举内、没有 evidence、金额在原文里找不到、**`quote` 在原文里找不到**、`status_history` 时间倒流、`done`/`lost` 缺证据、正文里有手机号/邮箱/证件号。
 
-`--suggest` 只输出建议不改文件，派生状态由脚本算，不靠模型记忆：
+`--suggest` 只输出建议不改文件，派生状态由脚本算，不靠模型记忆。左列就是脚本原样打印的代码，排查时照抄：
 
-| 派生 | 含义 | 去哪 |
+| 代码 | 含义 | 去哪 |
 |---|---|---|
-| `stalled` | `last_update_at` 距 `--until` 超过 `silence-days` | 周报「风险与卡点」 |
-| `overdue` | `next_action_due` 已过期且 `status=active` | 日报「明日动作」第一行 |
-| `vanished` | 超过 2 倍 `silence-days` 没有证据追加 —— 人工确认是丢了还是搁置了 | 月报「客户结构」 |
-| `stale_promise` | 最后一条证据是我方承诺，之后没有我方消息 | 周报「我方承诺未闭环」 |
-| `regressed` | 阶段序号下降（如 `negotiation → quote`） | 风险段**第一行**，比停滞更紧急 |
-| `revived` | 沉默超 2 倍阈值后重新有往来 | 「本周推进」并标「复活」 |
+| `S_STALLED` | `last_update_at` 距 `--until` 超过 `silence-days` | 周报「风险与卡点」 |
+| `S_OVERDUE` | `next_action_due` 已过期且 `status=active` | 日报「明日动作」第一行 |
+| `S_VANISHED` | 超过 2 倍 `silence-days` 没有证据追加 —— 人工确认是丢了还是搁置了 | 月报「客户结构」 |
+| `S_STALE_PROMISE` | 最后一条证据是我方承诺，之后没有我方消息 | 周报「我方承诺未闭环」 |
+| `S_REGRESSED` | 阶段序号下降（如 `negotiation → quote`） | 风险段**第一行**，比停滞更紧急 |
+| `S_REVIVED` | 沉默超 2 倍阈值后重新有往来 | 「本周推进」并标「复活」 |
 
 前四个告诉你「没动静」，后两个告诉你「动了但方向不对」和「动了但差点被放弃」。**销售最贵的预警是后两个**：客户没消失，只是退回去了。
 
@@ -235,6 +235,7 @@ WARN 逐条看，不必全改：title 超过 40 字、`next_action` 为空、evi
 - 报告里不出现「大概」「预计」「有望」+ 数字的组合，除非那是客户原话的转述。
 - 周报以上必须有 `## 需要你拍板` 一节，**每项给两个选项**加期限；没有就写「无」。
 - 客户原话按配额取（日 1 / 周 2 / 月 3 / 季 5 / 年 8），只从台账 `quote` 取，引号内即原文。
+- **开头一行元信息**：标题下一行写窗口 / 台账版本 / 覆盖 / 生成时间，格式见 `renderers.md` 第 0 节。归档后靠这一行分清哪份报告基于哪版数据。
 - 输出文件名固定：`2026-11-25-daily.md`、`2026-W48-weekly.md`、`2026-11-monthly.md`、`2026-Q4-quarterly.md`、`2026-H2-halfyear.md`、`2026-annual.md`。
 
 **交付前三步验收**（不过就重写）：
@@ -292,7 +293,7 @@ WARN 逐条看，不必全改：title 超过 40 字、`next_action` 为空、evi
 | `check_ledger.py` 报 `E_QUOTE_NOT_GROUNDED` | 回窗口稿把那条消息的原文截一段（≤60 字，连续片段）替换掉概括句，省略处用 `……` | 原文里确实没有能支撑该结论的句子 → 删掉 `quote`，把判断改成不加引号的 `（推断）` 转述 |
 | 台账报 `W_QUOTE_EMPTY` | 这是预期告警不是错误：说明该条只有转述没有原文，报告里相应位置不能加引号 | 想在报告里加引号 → 必须补回原文片段，补不上就改写成转述 |
 | 月报写不出「完成度」 | 因为没目标。问用户要一句本月目标 | 用户不给 → 只报进展，标题写「进展月报」 |
-| 周报里某客户消失了 | 查台账该 item 是否 `stalled`/`vanished` | 消失了但没闭环 → 这本身要写进风险段 |
+| 周报里某客户消失了 | 查台账该 item 是否 `S_STALLED` / `S_VANISHED` | 消失了但没闭环 → 这本身要写进风险段 |
 | 客户从谈合同退回报价，周报里当成了普通推进 | 跑 `--suggest` 看 `S_REGRESSED`，它比对的是 `status_history` 的阶段序号 | 台账记了但 `status_history` 没写阶段变化 → 回窗口稿确认客户到底说了什么，补一条再算 |
 | 沉默很久的客户在报告里被当成新客户重新介绍 | 跑 `--suggest` 看 `S_REVIVED`（相邻证据间隔 > 2×`silence-days` 且最近一条在本周期内） | 确实断了很久 → 报告里标「复活」，仍沿用原 `item_id`，不要新建 |
 
@@ -307,12 +308,12 @@ WARN 逐条看，不必全改：title 超过 40 字、`next_action` 为空、evi
 - [ ] 全文 `###` 抽出来连读读得通，不是一串「客户名 —— 阶段（状态）」标签
 - [ ] 周报以上有「需要你拍板」，每项两个选项 + 期限；没有就写了「无」
 - [ ] 报告头有一行元信息（窗口 / 台账版本 / 覆盖 / 生成时间）
-- [ ] `regressed` 的客户排在风险段第一行，`revived` 的客户标了「复活」
+- [ ] `S_REGRESSED` 的客户排在风险段第一行，`S_REVIVED` 的客户标了「复活」
 - [ ] 月报以上有「证据索引」，正文只给金额与反直觉结论挂锚
 - [ ] 没有「预计 / 大概 / 有望 + 数字」
 - [ ] 台账 `check_ledger.py` 退出码 0
 - [ ] 上月/上周已在报告里出现的事项，本期是「延续」不是「重新介绍」
-- [ ] `stalled` / `overdue` / `vanished` 的客户在风险段有交代
+- [ ] `S_STALLED` / `S_OVERDUE` / `S_VANISHED` 的客户在风险段有交代
 - [ ] 报告末尾有「未验证项」，没把客户口头承诺写成已确认
 
 ## 🛑 停止条件
