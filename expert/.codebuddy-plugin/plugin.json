@@ -1,6 +1,6 @@
 {
   "name": "sales-worklog-expert",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Turns a salesperson's WeCom client chats and client group chats into daily, weekly, monthly, quarterly, half-year and annual work reports, backed by an item ledger where every claim and amount points to a message.",
   "author": {
     "name": "bennywen",

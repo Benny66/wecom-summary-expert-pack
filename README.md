@@ -10,9 +10,9 @@
 
 | | 状态 |
 |---|---|
-| 技能 `skill/` | v0.2，端到端跑通：fixture 33 项断言 + 真实仓库守卫 2 项，全绿 |
+| 技能 `skill/` | v0.3，端到端跑通：fixture 39 项断言 + 真实仓库守卫 2 项，全绿 |
 | 采集模块 | 随技能携带（`scripts/wecom/` 13 py + 6 swift），装好即用 |
-| 专家包 `expert/` | v0.2，`check_package.py` 57 项 0 失败；成品包见 [Releases](https://github.com/Benny66/wecom-summary-expert-pack/releases) |
+| 专家包 `expert/` | v0.3，`check_package.py` 57 项 0 失败；成品包见 [Releases](https://github.com/Benny66/wecom-summary-expert-pack/releases) |
 
 ---
 
@@ -219,10 +219,10 @@ wecom-summary-expert-pack/
 
 | 命令 | 覆盖 | 当前结果 |
 |---|---|---|
-| `cd skill/scripts && bash selftest.sh` | 窗口切片、结构信号、群聊分边、渲染、台账校验、金额造假必须被拦 | **33 项 fixture 断言 + 2 项真实仓库守卫，全绿** |
+| `cd skill/scripts && bash selftest.sh` | 窗口切片、结构信号、群聊分边、渲染、台账校验、金额造假与原话造假必须被拦、阶段回退与复活 | **39 项 fixture 断言 + 2 项真实仓库守卫，全绿** |
 | `cd expert && bash scripts/build.sh` | 组装 → 打 zip → 按专家包规范 v2.4 逐项断言（结构 / 配置 / Agent MD / 头像 / 依赖 / ZIP） | **57 项，0 失败** |
 
-`selftest.sh` 是唯一能证明「改了没改坏」的东西。它包含一条反例：把台账金额从 30 万改成 50 万，必须报 `E_AMOUNT_NOT_GROUNDED` 且退出码 1。
+`selftest.sh` 是唯一能证明「改了没改坏」的东西。它包含两条反例：把台账金额从 30 万改成 50 万，必须报 `E_AMOUNT_NOT_GROUNDED`；把客户原话换成一句概括，必须报 `E_QUOTE_NOT_GROUNDED`。两者都要退出码 1。
 
 ## 运行环境
 
