@@ -11,9 +11,11 @@
     python3 check_ledger.py --ledger ~/worklog/ledger.json --json /tmp/lint.json
 
 检查分三级:
-    ERROR  必须改，否则退出码 1
+    ERROR  必须改，否则退出码 1。含金额原文核对与 quote 原文核对
     WARN   逐条看，不必全改
-    SUGGEST（--suggest）派生状态，只建议不改文件
+    SUGGEST（--suggest）派生状态，只建议不改文件：
+           stalled / overdue / vanished / stale_promise /
+           regressed（阶段回退）/ revived（沉默后复活）
 
 退出码:
     0  无 ERROR
@@ -47,7 +49,16 @@ PROMISE_WORDS = ("明天", "后天", "今天晚点", "稍后", "马上", "尽快
                  "我确认一下", "我问问", "我协调")
 
 TITLE_MAX = 40
-QUOTE_MAX = 200
+QUOTE_MAX = 60
+
+# 阶段序号：用于判定「阶段回退」。lost 是终态，不参与比较。
+STAGE_ORDER = {name: idx for idx, name in enumerate(STAGES[:8])}
+
+# quote 核对时抹平的字符：空白、常见标点、引号壳。
+QUOTE_PUNCT_RE = re.compile(r"[\s,，。．\.、；;：:！!？?\"'“”‘’「」『』（）()\[\]【】《》<>\-—~·　]")
+# PII 打码后会打断子串匹配（138****1234），比较前把长数字串抹成 #。
+DIGIT_RUN_RE = re.compile(r"[\d*]{6,}")
+ELLIPSIS_RE = re.compile(r"…+|\.{3,}|。{3,}")
 
 
 class Report(object):
@@ -132,6 +143,21 @@ def amount_variants(value):
 
 def normalized(text):
     return re.sub(r"[\s,，]", "", text or "")
+
+
+def quote_norm(text):
+    """quote 核对用的归一化：去标点、抹掉长数字串（打码后的手机号/卡号）。"""
+    return DIGIT_RUN_RE.sub("#", QUOTE_PUNCT_RE.sub("", text or ""))
+
+
+def quote_segments(quote):
+    """按省略号切段。每段独立核对，因为省略号代表中间被跳过的原文。"""
+    segs = []
+    for part in ELLIPSIS_RE.split(quote or ""):
+        seg = quote_norm(part)
+        if len(seg) >= 4:
+            segs.append(seg)
+    return segs
 
 
 def parse_self_names(text):
@@ -263,6 +289,14 @@ def check(ledger, window_index, window_by_conv, until, args, rep):
             hits = scan_pii(quote)
             if hits:
                 rep.error("E_PII", ew, "quote 里有{}，必须打码".format("/".join(hits)))
+            if quote and window_index and msg_id in window_index:
+                body = quote_norm(window_index[msg_id].get("body"))
+                for si, seg in enumerate(quote_segments(quote)):
+                    if seg not in body:
+                        rep.error("E_QUOTE_NOT_GROUNDED", ew,
+                                  "quote 第 {} 段不是原文片段：「{}…」——引号内不许概括或改词，"
+                                  "只截取原文，省略处用 ……".format(si + 1, seg[:16]))
+                        break
             if not parse_date(ev.get("at")):
                 rep.warn("W_EVIDENCE_TIME", ew, "evidence.at 缺失或格式不是 YYYY-MM-DD…")
 
@@ -336,6 +370,43 @@ def check(ledger, window_index, window_by_conv, until, args, rep):
             rep.warn("W_DUP_TITLE", client, "同一客户有多个 active 项标题相同：{}".format(title))
 
 
+def suggest_regressed(item, where, rep):
+    """阶段回退：status_history 相邻两条 to 的阶段序号下降。只报最近一次。"""
+    history = item.get("status_history") or []
+    latest = None
+    for idx in range(1, len(history)):
+        prev_hop, cur_hop = history[idx - 1], history[idx]
+        if not isinstance(prev_hop, dict) or not isinstance(cur_hop, dict):
+            continue
+        frm, to = prev_hop.get("to"), cur_hop.get("to")
+        if frm not in STAGE_ORDER or to not in STAGE_ORDER:
+            continue
+        if STAGE_ORDER[to] < STAGE_ORDER[frm]:
+            latest = (frm, to, str(cur_hop.get("at") or "")[:10])
+    if latest:
+        frm, to, at = latest
+        rep.suggest("S_REGRESSED", where,
+                    "阶段回退 {} → {}（{}）：比停滞更紧急，说明对客户的判断要修正".format(frm, to, at))
+
+
+def suggest_revived(item, where, today, silence, rep):
+    """复活：沉默超过 2×阈值后又重新有往来，且最近一条就在本周期内。"""
+    dates = []
+    for ev in item.get("evidence") or []:
+        if isinstance(ev, dict):
+            d = parse_date(ev.get("at"))
+            if d:
+                dates.append(d)
+    if len(dates) < 2:
+        return
+    dates.sort()
+    gap = (dates[-1] - dates[-2]).days
+    if gap > silence * 2 and (today - dates[-1]).days <= silence:
+        rep.suggest("S_REVIVED", where,
+                    "沉默 {} 天后于 {} 重新有往来：报告里标「复活」，不要当新客户重新介绍".format(
+                        gap, dates[-1]))
+
+
 def suggest(items, until, args, rep, window_by_conv):
     silence = args.silence_days
     today = until
@@ -346,6 +417,11 @@ def suggest(items, until, args, rep, window_by_conv):
         item_id = str(item.get("item_id") or "?")
         client = str(item.get("client") or "?")
         where = "{} {}".format(item_id, client)
+
+        # 这两类是「动过但方向不对 / 动过但差点被放弃」，对已关闭的条目同样有意义
+        suggest_regressed(item, where, rep)
+        suggest_revived(item, where, today, silence, rep)
+
         if item.get("status") != "active":
             continue
         updated = parse_date(item.get("last_update_at"))

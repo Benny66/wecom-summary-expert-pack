@@ -227,6 +227,74 @@ else
 fi
 
 echo ""
+echo "== 5b. 原话造假（必须被拦） =="
+python3 - "${FIXTURE}/expected-ledger.json" "${OUT}/fake-quote.json" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1], encoding="utf-8"))
+item = data["items"][0]
+item["evidence"][1]["quote"] = "客户觉得价格有点贵，希望给个优惠"
+json.dump(data, open(sys.argv[2], "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+print("把第 1 条 evidence 的 quote 换成概括句")
+PY
+
+python3 "${HERE}/check_ledger.py" --ledger "${OUT}/fake-quote.json" \
+  --window "${OUT}/window.msgs.jsonl" --until 2026-11-25 >"${OUT}/fake-quote.log" 2>&1
+FQ_EXIT=$?
+cat "${OUT}/fake-quote.log"
+if [ "${FQ_EXIT}" -eq 1 ]; then
+  pass "退出码 1"
+else
+  fail "退出码应为 1，实际 ${FQ_EXIT}"
+fi
+if grep -q 'E_QUOTE_NOT_GROUNDED' "${OUT}/fake-quote.log"; then
+  pass "报出 E_QUOTE_NOT_GROUNDED"
+else
+  fail "没报 E_QUOTE_NOT_GROUNDED，原话闸失效"
+fi
+
+echo ""
+echo "== 5c. 阶段回退与复活（派生状态） =="
+python3 - "${FIXTURE}/expected-ledger.json" "${OUT}/regressed.json" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1], encoding="utf-8"))
+item = data["items"][0]
+item["stage"] = "quote"
+item["status_history"] = [
+    {"at": "2026-11-19", "from": None, "to": "quote", "note": "客户主动询价"},
+    {"at": "2026-11-20", "from": "quote", "to": "negotiation", "note": "进入条款沟通"},
+    {"at": "2026-11-23", "from": "negotiation", "to": "quote", "note": "客户说先按原报价走"},
+]
+json.dump(data, open(sys.argv[2], "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+print("造一条 negotiation → quote 的回退")
+PY
+
+python3 "${HERE}/check_ledger.py" --ledger "${OUT}/regressed.json" \
+  --window "${OUT}/window.msgs.jsonl" --until 2026-11-25 --suggest >"${OUT}/regressed.log" 2>&1
+if grep -q 'S_REGRESSED' "${OUT}/regressed.log"; then
+  pass "报出 S_REGRESSED"
+else
+  fail "没报 S_REGRESSED，回退信号失效"
+fi
+
+python3 - "${FIXTURE}/expected-ledger.json" "${OUT}/revived.json" <<'PY'
+import json, sys
+data = json.load(open(sys.argv[1], encoding="utf-8"))
+item = data["items"][0]
+item["evidence"] = [item["evidence"][0], item["evidence"][-1]]
+item["evidence"][0]["at"] = "2026-11-04 09:30"
+json.dump(data, open(sys.argv[2], "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+print("造一条沉默 19 天后回来的证据链")
+PY
+
+python3 "${HERE}/check_ledger.py" --ledger "${OUT}/revived.json" \
+  --window "${OUT}/window.msgs.jsonl" --until 2026-11-25 --suggest >"${OUT}/revived.log" 2>&1
+if grep -q 'S_REVIVED' "${OUT}/revived.log"; then
+  pass "报出 S_REVIVED"
+else
+  fail "没报 S_REVIVED，复活信号失效"
+fi
+
+echo ""
 echo "== 6. 真实仓库（存在则跑） =="
 REAL="${HOME}/wecom-data/wecom-chat-sales-test"
 if [ -d "${REAL}" ]; then

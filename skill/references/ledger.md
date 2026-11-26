@@ -80,8 +80,24 @@
 | `next_action` | `active` 时必填 | 下一步做什么；空着等于没在管 |
 | `next_action_due` | 建议 | 过期会进 `overdue` |
 | `amount` | 可选 | 四项齐全，见金额铁律 |
-| `evidence` | 是，至少一条 | 只追加不删除 |
+| `evidence` | 是，至少一条 | 只追加不删除；每条必须有 `quote` |
 | `status_history` | 是，至少一条 | 时间单调不减，最后一条的 `to` 必须等于当前 `stage` |
+
+### 1.1 evidence.quote 的口径
+
+`quote` 是**报告里唯一能加引号的东西**，所以口径要死：
+
+| 规矩 | 说明 |
+|---|---|
+| 是原文子串 | 去掉空白与标点后，必须是该 `msg_id` 那条消息正文的连续片段。`check_ledger.py` 会核对 |
+| 允许截取 | 只截能支撑结论的那一段，中间省略用 `……`。**不许改词** |
+| 长度 ≤ 60 字 | 超过 60 字说明想当摘要用，那是报告的事，不是台账的事 |
+| 优先客户方 | 报告有原话配额，配额只能用客户方的话满足。我方承诺留在 `S_STALE_PROMISE` 判定里 |
+| PII 必须打码 | 手机号写成 `138****1234`。打码后不算严格子串，脚本会先把长数字串抹平再比 |
+
+**`quote` 不是摘要。** 写「客户觉得贵」无效，写「价格高了 5 个点，能不能给个阶梯」才有效——前者报告里不能用引号，后者能。
+
+原话补不上时（比如只做了语音沟通、消息没采到），该条 evidence 允许缺 `quote`，但报告里对应的判断必须降级为不加引号的 `（推断）` 转述。
 
 ## 2. 状态机
 
@@ -130,6 +146,14 @@
 | `overdue` | `status=active` 且 `next_action_due < until` | 进日报「明日动作」第一行 |
 | `vanished` | `status=active` 且 `until - last_update_at > 2 × silence_days` | 进月报「客户结构」的失联区，人工确认后改 `status` |
 | `stale_promise` | 最后一条 evidence 是我方承诺类话术，且之后无追加 | 进周报「我方承诺未闭环」 |
+| `regressed` | `status_history` 里相邻两条 `to` 的阶段**序号下降**（`lost` 除外） | 进风险段**第一行**，比 `stalled` 更紧急 |
+| `revived` | 相邻两条 evidence 间隔 > 2 × `silence_days`，且最后一条就在本周期内 | 进「本周推进」并标「复活」 |
+
+前四个是「没动静」的信号，后两个是「动了但方向不对 / 动了但差点被放弃」的信号。销售最贵的早期预警恰恰是后两个：客户没有消失，只是退回去了。
+
+`regressed` 只看阶段序号，不看措辞。`quote` 退回 `discovery`、`negotiation` 退回 `quote` 都会算，且**必须**在 `status_history` 的 `note` 里写清客户怎么说的（见 `sales-signals.md` 第 1 节）。
+
+`revived` 的「本周期内」指最后一条 evidence 的日期 ≥ `until - silence_days`。只沉默过但没回来，不算复活。
 
 ## 4. 更新规则
 
